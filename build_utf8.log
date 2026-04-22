@@ -1,0 +1,89 @@
+﻿[33mÔØ»[39m Building...
+[32mÔ£ö[39m Building...
+Application bundle generation failed. [2.162 seconds]
+
+node.exe : [1m[31m[31mX 
+[41;31m[[41;97mERROR[41;31m][0m 
+[1mNG5002: Incomplete block "inventario". If 
+you meant to write the @ character, you should 
+use the "&#64;" HTML entity instead.[0m 
+[1m[35m[plugin angular-compiler][0m
+En C:\Program Files\nodejs\npx.ps1: 29 
+Carácter: 3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ( 
+   [1m[31m[31mX...r-compiler][0m:String) [  
+  ], RemoteException
+    + FullyQualifiedErrorId : NativeCommandErr 
+   or
+ 
+
+    
+src/app/pages/login/login.component.html:69:20:
+[37m      69 Ôöé           <p>ÔÇó 
+adm[32min@inventar[37mio.com / admin123</p>
+         ÔòÁ                   
+[32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component 
+LoginComponent.
+
+    
+src/app/pages/login/login.component.ts:11:15:
+[37m      11 Ôöé   templateUrl: 
+[32m'./login.component.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mNG5002: Incomplete block "inventario". If 
+you meant to write the @ character, you should 
+use the "&#64;" HTML entity instead.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    
+src/app/pages/login/login.component.html:70:23:
+[37m      70 Ôöé           <p>ÔÇó 
+auxili[32mar@inventar[37mio.com / 
+auxiliar123</p>
+         ÔòÁ                      
+[32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component 
+LoginComponent.
+
+    
+src/app/pages/login/login.component.ts:11:15:
+[37m      11 Ôöé   templateUrl: 
+[32m'./login.component.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m 
+[1mNG5002: Incomplete block "inventario". If 
+you meant to write the @ character, you should 
+use the "&#64;" HTML entity instead.[0m 
+[1m[35m[plugin angular-compiler][0m
+
+    
+src/app/pages/login/login.component.html:71:22:
+[37m      71 Ôöé           <p>ÔÇó 
+geren[32mte@inventar[37mio.com / 
+gerente123</p>
+         ÔòÁ                     
+[32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component 
+LoginComponent.
+
+    
+src/app/pages/login/login.component.ts:11:15:
+[37m      11 Ôöé   templateUrl: 
+[32m'./login.component.html'[37m,
+         ÔòÁ                
+[32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

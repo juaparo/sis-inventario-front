@@ -1,0 +1,94 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Sidebar -->
+  <aside
+    class="fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-white border-r border-gray-200"
+    [ngClass]="sidebarOpen ? 'w-64' : 'w-20'"
+  >
+    <div class="h-full flex flex-col">
+      <!-- Logo -->
+      <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+        <div *ngIf="sidebarOpen" class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <lucide-icon [img]="PackageIcon" class="w-5 h-5 text-white"></lucide-icon>
+          </div>
+          <span class="font-semibold text-gray-900">SIS-INVENTARIO</span>
+        </div>
+        
+        <button
+          (click)="toggleSidebar()"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-9 w-9 text-gray-700 bg-transparent"
+        >
+          <lucide-icon *ngIf="sidebarOpen" [img]="XIcon" class="w-5 h-5"></lucide-icon>
+          <lucide-icon *ngIf="!sidebarOpen" [img]="MenuIcon" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 p-4 space-y-2">
+        <button
+          *ngFor="let item of menuItems"
+          (click)="router.navigate([item.path])"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-0"
+          [ngClass]="isActive(item.path) ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 bg-transparent'"
+        >
+          <lucide-icon [img]="item.icon" class="w-5 h-5 flex-shrink-0"></lucide-icon>
+          <ng-container *ngIf="sidebarOpen">
+            <span class="flex-1 text-left">{{item.label}}</span>
+            <span *ngIf="item.badge && item.badge > 0" class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-red-500 text-white border-transparent">
+              {{item.badge}}
+            </span>
+          </ng-container>
+        </button>
+      </nav>
+
+      <!-- Logout button -->
+      <div class="p-4 border-t border-gray-200">
+        <button
+          (click)="handleLogout()"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors bg-transparent border-0"
+        >
+          <lucide-icon [img]="LogOutIcon" class="w-5 h-5 flex-shrink-0"></lucide-icon>
+          <span *ngIf="sidebarOpen">Cerrar sesión</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div
+    class="transition-all duration-300"
+    [ngClass]="sidebarOpen ? 'ml-64' : 'ml-20'"
+  >
+    <!-- Topbar -->
+    <header class="h-16 bg-white border-b border-gray-200 sticky top-0 z-30">
+      <div class="h-full px-6 flex items-center justify-between">
+        <div class="flex-1"></div>
+
+        <!-- User info -->
+        <div class="flex items-center gap-4">
+          <!-- Notifications -->
+          <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors bg-transparent border-0">
+            <lucide-icon [img]="BellIcon" class="w-5 h-5"></lucide-icon>
+            <span *ngIf="unreadAlerts > 0" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
+
+          <!-- User profile -->
+          <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+            <div class="text-right">
+              <p class="text-sm font-medium text-gray-900 m-0">{{user.name}}</p>
+              <p class="text-xs text-gray-500 m-0">{{user.role}}</p>
+            </div>
+            <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full cursor-pointer bg-blue-600 text-white flex items-center justify-center font-bold">
+              {{getInitials(user.name)}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="p-6">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

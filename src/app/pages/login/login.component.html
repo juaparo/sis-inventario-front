@@ -1,0 +1,80 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Logo y título -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-xl mb-4">
+        <lucide-icon [img]="PackageIcon" class="w-8 h-8 text-white"></lucide-icon>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900">SIS-INVENTARIO</h1>
+      <p class="text-gray-500 mt-2">Sistema de Gestión de Inventarios</p>
+    </div>
+
+    <!-- Card de login -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">Iniciar sesión</h2>
+
+      <form (submit)="handleSubmit($event)" class="space-y-5">
+        <!-- Email -->
+        <div class="space-y-2">
+          <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Correo electrónico</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="usuario@ejemplo.com"
+            [(ngModel)]="email"
+            name="email"
+            (ngModelChange)="errors.email = ''"
+            [ngClass]="errors.email ? 'border-red-500' : ''"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          <p *ngIf="errors.email" class="text-sm text-red-500">{{errors.email}}</p>
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-2">
+          <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
+          <div class="relative">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              placeholder="••••••••"
+              [(ngModel)]="password"
+              name="password"
+              (ngModelChange)="errors.password = ''"
+              [ngClass]="errors.password ? 'border-red-500 pr-10' : 'pr-10'"
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <lucide-icon *ngIf="showPassword" [img]="EyeOffIcon" class="w-4 h-4"></lucide-icon>
+              <lucide-icon *ngIf="!showPassword" [img]="EyeIcon" class="w-4 h-4"></lucide-icon>
+            </button>
+          </div>
+          <p *ngIf="errors.password" class="text-sm text-red-500">{{errors.password}}</p>
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary-foreground shadow h-9 px-4 py-2 w-full bg-blue-600 hover:bg-blue-700 text-white">
+          Iniciar sesión
+        </button>
+      </form>
+
+      <!-- Información de usuarios de prueba -->
+      <div class="mt-6 pt-6 border-t border-gray-200">
+        <p class="text-xs text-gray-500 mb-2">Usuarios de prueba:</p>
+        <div class="space-y-1 text-xs text-gray-600">
+          <p>• admin&#64;inventario.com / admin123</p>
+          <p>• auxiliar&#64;inventario.com / auxiliar123</p>
+          <p>• gerente&#64;inventario.com / gerente123</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-center text-sm text-gray-500 mt-6">
+      © 2026 SIS-INVENTARIO. Todos los derechos reservados.
+    </p>
+  </div>
+</div>
