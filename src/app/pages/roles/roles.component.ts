@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Plus, Edit2, Power, PowerOff, Search, Shield, Check, X, LucideAngularModule } from 'lucide-angular';
+import { Plus, Edit2, Power, PowerOff, Search, Shield, Check, X, LucideAngularModule, Pen } from 'lucide-angular';
+import { RoleService } from '../../services/role.service';
+import { ToastService } from '../../components/toast/toast.service';
 
 @Component({
   selector: 'app-roles',
@@ -12,7 +14,7 @@ import { Plus, Edit2, Power, PowerOff, Search, Shield, Check, X, LucideAngularMo
 })
 export class RolesComponent implements OnInit {
   PlusIcon = Plus;
-  Edit2Icon = Edit2;
+  Edit2Icon = Pen;
   PowerIcon = Power;
   PowerOffIcon = PowerOff;
   SearchIcon = Search;
@@ -37,21 +39,30 @@ export class RolesComponent implements OnInit {
     { id: 'roles_manage', name: 'Gestionar Roles', description: 'Crear, editar roles', module: 'Roles' },
   ];
 
-  roles = [
-    { id: '1', name: 'Administrador', description: 'Acceso total al sistema con todos los permisos', permissions: this.availablePermissions.map((p) => p.id), userCount: 1, status: 'active', createdAt: '2026-01-01' },
-    { id: '2', name: 'Gerente', description: 'Acceso básico del inventario', permissions: ['dashboard_view', 'products_view', 'products_edit'], userCount: 1, status: 'active', createdAt: '2026-01-01' },
-    { id: '3', name: 'Auxiliar de Bodega', description: 'Acceso limitado', permissions: ['movements_create'], userCount: 2, status: 'active', createdAt: '2026-01-01' },
-  ];
+  roles: any[] = [];
+
+  constructor(
+    private roleService: RoleService,
+    private toast: ToastService
+  ) { }
 
   ngOnInit() {
     const userStr = localStorage.getItem('user');
     const currentUser = userStr ? JSON.parse(userStr) : {};
     this.isAdmin = currentUser.role === 'Administrador';
+    this.loadRoles();
+  }
+
+  loadRoles() {
+    this.roleService.getRoles().subscribe({
+      next: (data) => this.roles = data,
+      error: (err) => this.toast.error('Error al cargar roles')
+    });
   }
 
   get filteredRoles() {
-    return this.roles.filter(r => 
-      r.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
+    return this.roles.filter(r =>
+      r.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       r.description.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
@@ -61,7 +72,7 @@ export class RolesComponent implements OnInit {
   }
 
   get totalUsers() {
-    return this.roles.reduce((sum, r) => sum + r.userCount, 0);
+    return this.roles.reduce((sum, r) => sum + (r.userCount || 0), 0);
   }
 
   get permissionsByModule() {
@@ -119,10 +130,35 @@ export class RolesComponent implements OnInit {
 
   saveRole() {
     if (!this.formData.name || !this.formData.description || this.formData.permissions.length === 0) return;
-    this.closeModal();
+
+    if (this.editingRole) {
+      this.roleService.updateRole(this.editingRole._id, this.formData).subscribe({
+        next: () => {
+          this.toast.success('Rol actualizado correctamente');
+          this.loadRoles();
+          this.closeModal();
+        },
+        error: (err) => this.toast.error(err.error?.message || 'Error al actualizar')
+      });
+    } else {
+      this.roleService.createRole(this.formData).subscribe({
+        next: () => {
+          this.toast.success('Rol creado correctamente');
+          this.loadRoles();
+          this.closeModal();
+        },
+        error: (err) => this.toast.error(err.error?.message || 'Error al crear')
+      });
+    }
   }
 
   toggleStatus(role: any) {
-    role.status = role.status === 'active' ? 'inactive' : 'active';
+    this.roleService.toggleRoleStatus(role._id).subscribe({
+      next: (updated) => {
+        role.status = updated.status;
+        this.toast.success('Estado actualizado');
+      },
+      error: (err) => this.toast.error('Error al cambiar el estado')
+    });
   }
 }

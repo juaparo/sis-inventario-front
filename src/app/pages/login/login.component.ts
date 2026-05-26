@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LucideAngularModule, Eye, EyeOff, Package } from 'lucide-angular';
 import { ToastService } from '../../components/toast/toast.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -21,8 +22,13 @@ export class LoginComponent {
   password = '';
   showPassword = false;
   errors = { email: '', password: '' };
+  isLoading = false;
 
-  constructor(private router: Router, private toast: ToastService) {}
+  constructor(
+    private router: Router, 
+    private toast: ToastService,
+    private authService: AuthService
+  ) {}
 
   togglePassword() {
     this.showPassword = !this.showPassword;
@@ -59,22 +65,22 @@ export class LoginComponent {
       return;
     }
 
-    const users = [
-      { email: 'admin@inventario.com', password: 'admin123', name: 'Juan Pérez', role: 'Administrador' },
-      { email: 'auxiliar@inventario.com', password: 'auxiliar123', name: 'María García', role: 'Auxiliar de Bodega' },
-      { email: 'gerente@inventario.com', password: 'gerente123', name: 'Carlos López', role: 'Gerente' },
-    ];
-
-    const user = users.find((u) => u.email === this.email && u.password === this.password);
-
-    if (user) {
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('user', JSON.stringify(user));
-      this.toast.success(`¡Bienvenido ${user.name}!`);
-      this.router.navigate(['/']);
-    } else {
-      this.toast.error('Credenciales incorrectas');
-      this.errors.password = 'Correo o contraseña incorrectos';
-    }
+    this.isLoading = true;
+    
+    this.authService.login({ email: this.email, password: this.password }).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        this.toast.success(`¡Bienvenido ${response.user.name}!`);
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toast.error(err.error?.message || 'Credenciales incorrectas');
+        this.errors.password = 'Correo o contraseña incorrectos';
+      }
+    });
   }
 }

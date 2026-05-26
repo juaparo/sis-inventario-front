@@ -8,18 +8,7 @@ import { MovementsComponent } from './pages/movements/movements.component';
 import { AlertsComponent } from './pages/alerts/alerts.component';
 import { UsersComponent } from './pages/users/users.component';
 import { RolesComponent } from './pages/roles/roles.component';
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-
-export const authGuard = () => {
-  const router = inject(Router);
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  if (!isAuthenticated) {
-    router.navigate(['/login']);
-    return false;
-  }
-  return true;
-};
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },

@@ -67,8 +67,8 @@
             <td class="p-4 align-middle font-medium">{{user.name}}</td>
             <td class="p-4 align-middle">{{user.email}}</td>
             <td class="p-4 align-middle">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{'bg-purple-100 text-purple-700': user.role === 'Administrador', 'bg-blue-100 text-blue-700': user.role === 'Gerente', 'bg-green-100 text-green-700': user.role === 'Auxiliar de Bodega'}">
-                {{user.role}}
+              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{'bg-purple-100 text-purple-700': user.role?.name === 'Administrador', 'bg-blue-100 text-blue-700': user.role?.name === 'Gerente', 'bg-green-100 text-green-700': user.role?.name === 'Auxiliar de Bodega'}">
+                {{user.role?.name}}
               </span>
             </td>
             <td class="p-4 align-middle">
@@ -115,9 +115,7 @@
         <div class="space-y-2">
           <label class="text-sm font-medium">Rol</label>
           <select [(ngModel)]="formData.role" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none">
-            <option value="Administrador">Administrador</option>
-            <option value="Auxiliar de Bodega">Auxiliar de Bodega</option>
-            <option value="Gerente">Gerente</option>
+            <option *ngFor="let role of roles" [value]="role._id">{{role.name}}</option>
           </select>
         </div>
         <div class="space-y-2">

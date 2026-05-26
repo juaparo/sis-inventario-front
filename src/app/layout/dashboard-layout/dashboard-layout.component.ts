@@ -15,6 +15,7 @@ import {
   Tag, 
   Shield 
 } from 'lucide-angular';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -43,7 +44,10 @@ export class DashboardLayoutComponent implements OnInit {
 
   menuItems: any[] = [];
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
@@ -80,8 +84,7 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   handleLogout() {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('user');
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 
