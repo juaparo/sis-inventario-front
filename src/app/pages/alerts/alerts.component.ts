@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlertTriangle, Check, Clock, Package, LucideAngularModule } from 'lucide-angular';
-import { AlertService } from '../../services/alert.service';
+import { AlertsService } from '../../services/alerts.service';
 
 @Component({
   selector: 'app-alerts',
@@ -19,7 +19,7 @@ export class AlertsComponent implements OnInit {
   alerts: any[] = [];
   loading = false;
 
-  constructor(private alertService: AlertService) {}
+  constructor(private alertsService: AlertsService) { }
 
   ngOnInit() {
     this.loadAlerts();
@@ -27,48 +27,43 @@ export class AlertsComponent implements OnInit {
 
   loadAlerts() {
     this.loading = true;
-    this.alertService.getAlerts().subscribe({
+    this.alertsService.getAlerts().subscribe({
       next: (data) => {
         this.alerts = data;
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error al cargar alertas:', err);
+        console.error('Error loading alerts', err);
         this.loading = false;
       }
     });
   }
 
   get unreadAlerts() {
-    return this.alerts.filter(a => !a.leida);
+    return this.alerts.filter((alert) => !alert.read);
   }
 
   get readAlerts() {
-    return this.alerts.filter(a => a.leida);
+    return this.alerts.filter((alert) => alert.read);
   }
 
   get criticalAlertsCount() {
-    return this.alerts.filter(a => this.isCritical(a)).length;
-  }
-
-  isCritical(alert: any): boolean {
-    return alert.mensaje?.toLowerCase().includes('crítico');
+    return this.alerts.filter((a) => a.level === "OUT_OF_STOCK").length;
   }
 
   markAsRead(alertId: string) {
-    this.alertService.markAsRead(alertId).subscribe({
+    this.alertsService.markAsRead(alertId).subscribe({
       next: () => {
         const alert = this.alerts.find(a => a._id === alertId);
-        if (alert) alert.leida = true;
+        if (alert) alert.read = true;
       },
-      error: (err) => console.error('Error al marcar como leída:', err)
+      error: (err) => console.error('Error marking alert as read', err)
     });
   }
 
   markAllAsRead() {
-    this.alertService.markAllAsRead().subscribe({
-      next: () => this.alerts.forEach(a => a.leida = true),
-      error: (err) => console.error('Error al marcar todas como leídas:', err)
+    this.unreadAlerts.forEach(a => {
+      this.markAsRead(a._id);
     });
   }
 }

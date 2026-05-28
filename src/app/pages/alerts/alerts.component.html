@@ -5,7 +5,8 @@
       <h1 class="text-2xl font-semibold text-gray-900">Alertas</h1>
       <p class="text-gray-500 mt-1">Notificaciones de stock bajo y crítico</p>
     </div>
-    <button *ngIf="unreadAlerts.length > 0" (click)="markAllAsRead()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 bg-transparent text-gray-700">
+    <button *ngIf="unreadAlerts.length > 0" (click)="markAllAsRead()"
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 bg-transparent text-gray-700">
       <lucide-icon [img]="CheckIcon" class="w-4 h-4 mr-2"></lucide-icon>
       Marcar todas como leídas
     </button>
@@ -52,30 +53,34 @@
   <div *ngIf="unreadAlerts.length > 0" class="space-y-4">
     <h2 class="text-lg font-semibold text-gray-900">Alertas No Leídas ({{unreadAlerts.length}})</h2>
     <div class="space-y-3">
-      <div *ngFor="let alert of unreadAlerts" class="p-4 rounded-lg border transition-colors" [ngClass]="isCritical(alert) ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'">
+      <div *ngFor="let alert of unreadAlerts" class="p-4 rounded-lg border transition-colors"
+        [ngClass]="alert.level === 'OUT_OF_STOCK' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'">
         <div class="flex items-start gap-4">
-          <div class="flex-shrink-0 p-2 rounded-lg" [ngClass]="isCritical(alert) ? 'bg-red-100' : 'bg-amber-100'">
-            <lucide-icon [img]="AlertTriangleIcon" class="w-5 h-5" [ngClass]="isCritical(alert) ? 'text-red-600' : 'text-amber-600'"></lucide-icon>
+          <div class="flex-shrink-0 p-2 rounded-lg"
+            [ngClass]="alert.level === 'OUT_OF_STOCK' ? 'bg-red-100' : 'bg-amber-100'">
+            <lucide-icon [img]="AlertTriangleIcon" class="w-5 h-5"
+              [ngClass]="alert.level === 'OUT_OF_STOCK' ? 'text-red-600' : 'text-amber-600'"></lucide-icon>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-4 mb-2">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-white" [ngClass]="isCritical(alert) ? 'bg-red-600' : 'bg-amber-600'">
-                  {{isCritical(alert) ? 'Crítico' : 'Advertencia'}}
-                </span>
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-gray-600 bg-gray-100">
-                  {{alert.tipoOrigen === 'movimiento' ? 'Movimiento' : 'Producto'}}
+                <h3 class="font-medium text-gray-900">{{alert.product?.name}}</h3>
+                <span
+                  class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-white"
+                  [ngClass]="alert.level === 'OUT_OF_STOCK' ? 'bg-red-600 hover:bg-red-600' : 'bg-amber-600 hover:bg-amber-600'">
+                  {{alert.level === 'OUT_OF_STOCK' ? 'Crítico' : 'Advertencia'}}
                 </span>
               </div>
-              <button (click)="markAsRead(alert._id)" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium hover:bg-black/5 hover:text-accent-foreground h-9 px-3 bg-transparent text-gray-700 flex-shrink-0">
+              <button (click)="markAsRead(alert._id)"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium hover:bg-black/5 hover:text-accent-foreground h-9 rounded-md px-3 bg-transparent text-gray-700 flex-shrink-0">
                 <lucide-icon [img]="CheckIcon" class="w-4 h-4 mr-2"></lucide-icon>
                 Marcar como leída
               </button>
             </div>
-            <p class="text-sm text-gray-900">{{alert.mensaje}}</p>
+            <p class="text-sm text-gray-900">{{alert.message}}</p>
             <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
               <lucide-icon [img]="ClockIcon" class="w-3 h-3"></lucide-icon>
-              <span>{{alert.fecha | date:'dd/MM/yyyy HH:mm'}}</span>
+              <span>{{alert.createdAt | date:'short'}}</span>
             </div>
           </div>
         </div>
@@ -93,15 +98,15 @@
             <lucide-icon [img]="AlertTriangleIcon" class="w-5 h-5 text-gray-500"></lucide-icon>
           </div>
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 flex-wrap mb-2">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-gray-500 bg-gray-200">
-                {{alert.tipoOrigen === 'movimiento' ? 'Movimiento' : 'Producto'}}
-              </span>
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-medium text-gray-900">{{alert.product?.name}}</h3>
+              </div>
             </div>
-            <p class="text-sm text-gray-600">{{alert.mensaje}}</p>
+            <p class="text-sm text-gray-600">{{alert.message}}</p>
             <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
               <lucide-icon [img]="ClockIcon" class="w-3 h-3"></lucide-icon>
-              <span>{{alert.fecha | date:'dd/MM/yyyy HH:mm'}}</span>
+              <span>{{alert.createdAt | date:'short'}}</span>
             </div>
           </div>
         </div>
@@ -110,7 +115,8 @@
   </div>
 
   <!-- Empty state -->
-  <div *ngIf="alerts.length === 0 && !loading" class="rounded-xl border bg-card text-card-foreground shadow bg-white p-12">
+  <div *ngIf="alerts.length === 0 && !loading"
+    class="rounded-xl border bg-card text-card-foreground shadow bg-white p-12">
     <div class="text-center">
       <div class="inline-flex items-center justify-center w-16 h-16 bg-green-50 rounded-full mb-4">
         <lucide-icon [img]="CheckIcon" class="w-8 h-8 text-green-600"></lucide-icon>

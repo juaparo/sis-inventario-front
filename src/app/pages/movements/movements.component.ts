@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Plus, ArrowDownCircle, ArrowUpCircle, Search, LucideAngularModule } from 'lucide-angular';
+import { MovementsService } from '../../services/movements.service';
+import { ProductsService } from '../../services/products.service';
+import { AuthService } from '../../services/auth.service';
+import { AlertsService } from '../../services/alerts.service';
 
 @Component({
   selector: 'app-movements',
@@ -10,7 +14,7 @@ import { Plus, ArrowDownCircle, ArrowUpCircle, Search, LucideAngularModule } fro
   templateUrl: './movements.component.html',
   styleUrls: ['./movements.component.css']
 })
-export class MovementsComponent {
+export class MovementsComponent implements OnInit {
   PlusIcon = Plus;
   ArrowDownCircleIcon = ArrowDownCircle;
   ArrowUpCircleIcon = ArrowUpCircle;
@@ -21,37 +25,56 @@ export class MovementsComponent {
   
   formData: any = {
     product: '',
-    type: 'Entrada',
-    quantity: ''
+    type: 'ENTRADA',
+    quantity: '',
+    reason: 'Ajuste de inventario',
+    supplier: ''
   };
 
-  products = [
-    { id: "1", name: "Laptop Dell XPS 15", stock: 3 },
-    { id: "2", name: "Mouse Logitech MX Master", stock: 5 },
-    { id: "3", name: "iPhone 14 Pro", stock: 45 },
-    { id: "4", name: "MacBook Pro M3", stock: 12 },
-    { id: "5", name: "iPad Air", stock: 28 },
-  ];
+  products: any[] = [];
+  movements: any[] = [];
+  currentUser: any;
 
-  movements = [
-    { id: "1", product: "iPhone 14 Pro", type: "Entrada", quantity: 50, user: "Juan Pérez", date: "2026-03-03 10:30" },
-    { id: "2", product: "MacBook Pro M3", type: "Salida", quantity: 15, user: "María García", date: "2026-03-03 09:15" },
-    { id: "3", product: "iPad Air", type: "Entrada", quantity: 30, user: "Juan Pérez", date: "2026-03-03 08:45" },
-    { id: "4", product: "AirPods Pro", type: "Salida", quantity: 25, user: "Carlos López", date: "2026-03-02 16:20" },
-    { id: "5", product: "Apple Watch Series 9", type: "Entrada", quantity: 40, user: "Juan Pérez", date: "2026-03-02 14:00" },
-    { id: "6", product: "Laptop Dell XPS 15", type: "Salida", quantity: 8, user: "María García", date: "2026-03-02 11:30" },
-    { id: "7", product: "Monitor LG 27 pulgadas", type: "Entrada", quantity: 20, user: "Juan Pérez", date: "2026-03-01 15:45" },
-    { id: "8", product: "Teclado Mecánico RGB", type: "Salida", quantity: 12, user: "Carlos López", date: "2026-03-01 13:20" },
-  ];
+  constructor(
+    private movementsService: MovementsService,
+    private productsService: ProductsService,
+    private authService: AuthService,
+    private alertsService: AlertsService
+  ) {
+    this.currentUser = this.authService.getUser();
+  }
+
+  ngOnInit() {
+    this.loadProducts();
+    this.loadMovements();
+  }
+
+  loadProducts() {
+    this.productsService.getProducts().subscribe({
+      next: (data) => this.products = data,
+      error: (err) => console.error('Error loading products', err)
+    });
+  }
+
+  loadMovements() {
+    this.movementsService.getMovements().subscribe({
+      next: (data) => this.movements = data,
+      error: (err) => console.error('Error loading movements', err)
+    });
+  }
 
   get filteredMovements() {
     return this.movements.filter((m) =>
-      m.product.toLowerCase().includes(this.searchTerm.toLowerCase())
+      m.product?.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) || false
     );
   }
 
-  openModal(type: 'Entrada' | 'Salida') {
+  openModal(type: 'ENTRADA' | 'SALIDA') {
     this.formData.type = type;
+    this.formData.product = '';
+    this.formData.quantity = '';
+    this.formData.reason = type === 'ENTRADA' ? 'Compra de inventario' : 'Venta o ajuste';
+    this.formData.supplier = '';
     this.isModalOpen = true;
   }
 
@@ -60,7 +83,23 @@ export class MovementsComponent {
   }
 
   saveMovement() {
-    if (!this.formData.product || !this.formData.quantity) return;
-    this.closeModal();
+    if (!this.formData.product || !this.formData.quantity || !this.formData.reason) return;
+    
+    const payload = {
+      ...this.formData,
+      user: this.currentUser?.id
+    };
+
+    this.movementsService.createMovement(payload).subscribe({
+      next: () => {
+        this.closeModal();
+        this.loadMovements();
+        this.loadProducts();
+        
+        // Refrescar las alertas (silenciosamente) para actualizar contador
+        this.alertsService.getAlerts().subscribe();
+      },
+      error: (err) => alert(err.error?.message || 'Error al guardar movimiento')
+    });
   }
 }
