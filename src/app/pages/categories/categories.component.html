@@ -77,7 +77,8 @@
             <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Productos</th>
             <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Fecha Creación</th>
             <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
-            <th *ngIf="authService.hasPermission('categories_manage')" class="h-12 px-4 text-right align-middle font-medium text-gray-500 border-b">Acciones</th>
+            <th *ngIf="authService.hasPermission('categories_manage')"
+              class="h-12 px-4 text-right align-middle font-medium text-gray-500 border-b">Acciones</th>
           </tr>
         </thead>
         <tbody class="[&_tr:last-child]:border-0">
@@ -174,7 +175,7 @@
         </button>
         <button (click)="saveCategory()"
           class="inline-flex items-center justify-center rounded-md text-sm font-medium shadow h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white">
-          Guardar en Base de Datos
+          Guardar
         </button>
       </div>
     </div>
