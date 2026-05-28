@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Plus, Edit2, Power, PowerOff, Search, Tag, LucideAngularModule } from 'lucide-angular';
+import { CategoriesService, Category } from '../../services/categories.service';
 
 @Component({
   selector: 'app-categories',
@@ -10,7 +11,10 @@ import { Plus, Edit2, Power, PowerOff, Search, Tag, LucideAngularModule } from '
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.css']
 })
-export class CategoriesComponent {
+export class CategoriesComponent implements OnInit {
+  private categoriesService = inject(CategoriesService);
+
+  // Inyección de iconos Lucide
   PlusIcon = Plus;
   Edit2Icon = Edit2;
   PowerIcon = Power;
@@ -18,47 +22,36 @@ export class CategoriesComponent {
   SearchIcon = Search;
   TagIcon = Tag;
 
+  // Estados de control de la UI
   searchTerm = '';
   isModalOpen = false;
-  editingCategory: any = null;
+  editingCategory: Category | null = null;
   
+  // Estructura del formulario reactivo local
   formData = {
     name: '',
     description: ''
   };
 
-  categories = [
-    { id: '1', name: 'Electrónica', description: 'Productos electrónicos y tecnológicos de alta gama', productCount: 45, status: 'active', createdAt: '2026-01-15' },
-    { id: '2', name: 'Accesorios', description: 'Accesorios y periféricos para computadoras', productCount: 78, status: 'active', createdAt: '2026-01-20' },
-    { id: '3', name: 'Móviles', description: 'Teléfonos inteligentes y dispositivos móviles', productCount: 32, status: 'active', createdAt: '2026-02-01' },
-    { id: '4', name: 'Tabletas', description: 'Tablets y dispositivos tipo iPad', productCount: 18, status: 'active', createdAt: '2026-02-10' },
-    { id: '5', name: 'Audio', description: 'Auriculares, altavoces y equipos de audio', productCount: 55, status: 'active', createdAt: '2026-02-15' },
-    { id: '6', name: 'Wearables', description: 'Smartwatches y dispositivos vestibles', productCount: 24, status: 'active', createdAt: '2026-03-01' },
-    { id: '7', name: 'Gaming', description: 'Consolas, videojuegos y accesorios gaming', productCount: 12, status: 'inactive', createdAt: '2026-03-05' },
-    { id: '8', name: 'Oficina', description: 'Material de oficina y papelería', productCount: 36, status: 'active', createdAt: '2026-03-10' }
-  ];
+  // Buffer de datos en memoria (Sincronizado con MongoDB)
+  categories: Category[] = [];
 
-  get filteredCategories() {
-    return this.categories.filter(c => 
-      c.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-      c.description.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
+  ngOnInit(): void {
+    this.loadCategories();
   }
 
-  get activeCategories() {
-    return this.categories.filter(c => c.status === 'active');
+  // Capa de integración: Consumo de API por HTTP GET
+  loadCategories(): void {
+    this.categoriesService.getCategories().subscribe({
+      next: (res) => {
+        // Normalización de identificadores únicos para la capa de presentación (id / _id)
+        this.categories = res.map(c => ({ ...c, id: c._id || c.id }));
+      },
+      error: (err) => console.error('Error cargando categorías de MongoDB:', err)
+    });
   }
 
-  get totalProducts() {
-    return this.categories.reduce((sum, c) => sum + c.productCount, 0);
-  }
-
-  get averageProducts() {
-    if (this.categories.length === 0) return 0;
-    return Math.round(this.totalProducts / this.categories.length);
-  }
-
-  openModal(category?: any) {
+  openModal(category?: Category) {
     if (category) {
       this.editingCategory = category;
       this.formData = { name: category.name, description: category.description };
@@ -73,12 +66,84 @@ export class CategoriesComponent {
     this.isModalOpen = false;
   }
 
+  // Despachador transaccional del Formulario
   saveCategory() {
-    if (!this.formData.name || !this.formData.description) return;
-    this.closeModal();
+    if (!this.formData.name.trim() || !this.formData.description.trim()) return;
+
+    if (this.editingCategory) {
+      // Flujo de Modificación (HTTP PUT)
+      const targetId = this.editingCategory.id || this.editingCategory._id;
+      if (!targetId) return;
+
+      this.categoriesService.updateCategory(targetId, this.formData).subscribe({
+        next: (updated) => {
+          const index = this.categories.findIndex(c => c.id === targetId);
+          if (index !== -1) {
+            // Reemplazo atómico en el arreglo local para refrescar la vista reactivamente
+            this.categories[index] = { ...this.categories[index], ...updated };
+          }
+          this.closeModal();
+        },
+        error: (err) => console.error('Error al actualizar categoría:', err)
+      });
+    } else {
+      // ==========================================
+      // APLICACIÓN DE CORRECCIÓN A (HTTP POST)
+      // ==========================================
+      this.categoriesService.createCategory({
+        name: this.formData.name,
+        description: this.formData.description,
+        status: 'active' // Inyección explícita del estado obligatorio requerido por la interfaz
+      }).subscribe({
+        next: (newCat) => {
+          // Inserción en el pipeline visual e inicialización de metadatos volátiles
+          this.categories.push({ 
+            ...newCat, 
+            id: newCat._id || newCat.id, 
+            productCount: 0, 
+            createdAt: new Date().toISOString().split('T')[0] 
+          });
+          this.closeModal();
+        },
+        error: (err) => console.error('Error al crear categoría:', err)
+      });
+    }
   }
 
-  toggleStatus(category: any) {
-    category.status = category.status === 'active' ? 'inactive' : 'active';
+  // Orquestador de cambio de estado lógico (Active/Inactive)
+  toggleStatus(category: Category) {
+    const nextStatus = category.status === 'active' ? 'inactive' : 'active';
+    const targetId = category.id || category._id;
+    if (!targetId) return;
+
+    this.categoriesService.updateCategory(targetId, { status: nextStatus }).subscribe({
+      next: () => {
+        category.status = nextStatus; // Mutación en caliente de la UI tras confirmación del backend
+      },
+      error: (err) => console.error('Error al cambiar estado:', err)
+    });
+  }
+
+  // ==========================================
+  // GETTERS DE PROCESAMIENTO REACTIVO (DATA-BINDING)
+  // ==========================================
+  get filteredCategories(): Category[] {
+    return this.categories.filter(c => 
+      c.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
+      c.description?.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
+  get activeCategories(): Category[] {
+    return this.categories.filter(c => c.status === 'active');
+  }
+
+  get totalProducts(): number {
+    return this.categories.reduce((sum, c) => sum + (c.productCount || 0), 0);
+  }
+
+  get averageProducts(): number {
+    if (this.categories.length === 0) return 0;
+    return Math.round(this.totalProducts / this.categories.length);
   }
 }

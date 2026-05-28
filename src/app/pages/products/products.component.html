@@ -1,70 +1,107 @@
 <div class="space-y-6 relative">
-  <!-- Header -->
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-semibold text-gray-900">Productos</h1>
-      <p class="text-gray-500 mt-1">Gestión de productos del inventario</p>
+      <h1 class="text-2xl font-semibold text-gray-900">Inventario de Productos</h1>
+      <p class="text-gray-500 mt-1">Gestión, stock y control de existencias globales</p>
     </div>
-    <button (click)="openModal()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white shadow">
-      <lucide-icon [img]="PlusIcon" class="w-4 h-4 mr-2"></lucide-icon>
+    <button 
+      (click)="openModal()" 
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white shadow transition-colors"
+      aria-label="Agregar nuevo producto al sistema">
+      <lucide-icon [img]="PlusIcon" class="w-4 h-4 mr-2" aria-hidden="true"></lucide-icon>
       Nuevo Producto
     </button>
   </div>
 
-  <!-- Filters -->
   <div class="rounded-xl border bg-card text-card-foreground shadow bg-white p-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="md:col-span-2 relative">
-        <lucide-icon [img]="SearchIcon" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></lucide-icon>
-        <input [(ngModel)]="searchTerm" placeholder="Buscar productos..." class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm pl-10 focus:outline-none" />
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="relative flex-1">
+        <lucide-icon [img]="SearchIcon" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true"></lucide-icon>
+        <input 
+          id="searchProduct"
+          type="text"
+          [(ngModel)]="searchTerm" 
+          placeholder="Buscar productos por nombre..." 
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm pl-10 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          aria-label="Filtrar productos por coincidencia de texto" />
       </div>
-      <select [(ngModel)]="categoryFilter" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none">
-        <option *ngFor="let cat of categories" [value]="cat">{{cat === 'all' ? 'Todas las categorías' : cat}}</option>
-      </select>
-      <select [(ngModel)]="priceRange" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none">
-        <option value="all">Todos los precios</option>
-        <option value="0-100">$0 - $100</option>
-      </select>
+      
+      <div class="w-full md:w-48">
+        <select 
+          id="filterCategory"
+          [(ngModel)]="categoryFilter"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          aria-label="Filtrar por categoría">
+          <option value="all">Todas las categorías</option>
+          <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.name }}</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <!-- Table -->
   <div class="rounded-xl border bg-card text-card-foreground shadow bg-white">
     <div class="overflow-x-auto">
-      <table class="w-full caption-bottom text-sm">
-        <thead class="[&_tr]:border-b">
-          <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[100px]">Nombre</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Categoría</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Precio</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Stock Actual</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Stock Mínimo</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Estado</th>
-            <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Acciones</th>
+      <table class="w-full caption-bottom text-sm" aria-label="Tabla de productos en existencia">
+        <thead class="[&_tr]:border-b bg-gray-50/75">
+          <tr class="border-b transition-colors hover:bg-muted/50">
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Nombre del Producto</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Categoría</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Precio Unitario</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Stock Actual</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Stock Mínimo</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
+            <th class="h-12 px-4 text-right align-middle font-medium text-gray-500">Acciones</th>
           </tr>
         </thead>
         <tbody class="[&_tr:last-child]:border-0">
-          <tr *ngFor="let product of paginatedProducts" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted" [ngClass]="{'bg-red-50': product.stock < product.minStock}">
-            <td class="p-4 align-middle font-medium">{{product.name}}</td>
-            <td class="p-4 align-middle">{{product.category}}</td>
-            <td class="p-4 align-middle">${{product.price}}</td>
-            <td class="p-4 align-middle">
-              <span [ngClass]="{'text-red-600 font-medium': product.stock < product.minStock}">{{product.stock}}</span>
+          <tr *ngFor="let product of paginatedProducts" class="border-b transition-colors hover:bg-gray-50/50">
+            <td class="p-4 align-middle font-medium text-gray-900">{{ product.name }}</td>
+            <td class="p-4 align-middle text-gray-600">
+              <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+                {{ product.category }}
+              </span>
             </td>
-            <td class="p-4 align-middle">{{product.minStock}}</td>
+            <td class="p-4 align-middle text-gray-600">{{ product.price | currency:'COP':'symbol':'1.0-2' }}</td>
             <td class="p-4 align-middle">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold" [ngClass]="product.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
-                {{product.status === 'active' ? 'Activo' : 'Inactivo'}}
+              <span class="font-semibold" [ngClass]="product.stock <= product.minStock ? 'text-red-600 font-bold' : 'text-gray-700'">
+                {{ product.stock }} und
+              </span>
+            </td>
+            <td class="p-4 align-middle text-gray-500">{{ product.minStock }} und</td>
+            <td class="p-4 align-middle">
+              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold" 
+                [ngClass]="product.status === 'active' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'">
+                {{ product.status === 'active' ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
             <td class="p-4 align-middle text-right">
-              <div class="flex items-center justify-end gap-2">
-                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-9 w-9 text-gray-700 bg-transparent">
-                  <lucide-icon [img]="Edit2Icon" class="w-4 h-4"></lucide-icon>
+              <div class="flex items-center justify-end gap-1">
+                <button 
+                  type="button"
+                  (click)="editProduct(product)"
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-8 w-8 bg-transparent text-blue-600"
+                  title="Editar Producto">
+                  <span class="sr-only">Editar</span>
+                  <lucide-icon [img]="Edit2Icon" class="w-4 h-4" aria-hidden="true"></lucide-icon>
                 </button>
-                <button (click)="toggleStatus(product)" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-9 w-9 bg-transparent" [ngClass]="product.status === 'active' ? 'text-red-600' : 'text-green-600'">
-                  <lucide-icon *ngIf="product.status === 'active'" [img]="PowerOffIcon" class="w-4 h-4"></lucide-icon>
-                  <lucide-icon *ngIf="product.status !== 'active'" [img]="PowerIcon" class="w-4 h-4"></lucide-icon>
+
+                <button 
+                  type="button"
+                  (click)="deleteProduct(product)"
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-8 w-8 bg-transparent text-red-500"
+                  title="Eliminar Producto">
+                  <span class="sr-only">Eliminar</span>
+                  <lucide-icon [img]="TrashIcon" class="w-4 h-4" aria-hidden="true"></lucide-icon>
+                </button>
+
+                <button 
+                  type="button"
+                  (click)="toggleStatus(product)" 
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-8 w-8 bg-transparent" 
+                  [title]="product.status === 'active' ? 'Inactivar' : 'Activar'">
+                  <span class="sr-only">Estado</span>
+                  <lucide-icon *ngIf="product.status === 'active'" [img]="PowerOffIcon" class="w-4 h-4 text-orange-500" aria-hidden="true"></lucide-icon>
+                  <lucide-icon *ngIf="product.status !== 'active'" [img]="PowerIcon" class="w-4 h-4 text-green-600" aria-hidden="true"></lucide-icon>
                 </button>
               </div>
             </td>
@@ -72,29 +109,104 @@
         </tbody>
       </table>
     </div>
+
+    <div *ngIf="filteredProducts.length === 0" class="text-center py-12">
+      <h3 class="text-lg font-medium text-gray-900 mb-1">No se encontraron productos</h3>
+      <p class="text-gray-500 text-sm">Prueba ajustando los términos de búsqueda o filtros.</p>
+    </div>
   </div>
 
-  <!-- Minimalist Modal Overlay (Tailwind CSS) -->
-  <div *ngIf="isModalOpen" class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 flex items-center justify-center">
-    <div class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg md:w-full bg-white">
+  <div *ngIf="isModalOpen" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+    <div class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border p-6 shadow-lg sm:rounded-lg bg-white" role="dialog" aria-modal="true">
+      
       <div class="flex flex-col space-y-1.5 text-center sm:text-left">
-        <h2 class="text-lg font-semibold leading-none tracking-tight">Nuevo Producto</h2>
-        <p class="text-sm text-muted-foreground text-gray-500">Complete la información del producto</p>
+        <h2 class="text-lg font-semibold text-gray-900">{{ isEditing ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+        <p class="text-sm text-gray-500">Complete los campos para actualizar la información del catálogo global</p>
       </div>
-      <div class="space-y-4 py-4">
+
+      <form (ngSubmit)="saveProduct()" #productForm="ngForm" class="space-y-4 py-2">
+        
         <div class="space-y-2">
-          <label class="text-sm font-medium">Nombre del producto</label>
-          <input type="text" placeholder="Ej: Laptop Dell XPS 15" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" />
+          <label for="prodName" class="text-sm font-medium text-gray-700">Nombre del producto *</label>
+          <input 
+            id="prodName"
+            type="text"
+            [(ngModel)]="productFormData.name" 
+            name="name" 
+            placeholder="Ej: Motorola G06" 
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500" 
+            required />
         </div>
-      </div>
-      <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
-        <button (click)="closeModal()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 bg-transparent text-gray-800">
-          Cancelar
-        </button>
-        <button (click)="closeModal()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary-foreground shadow h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white">
-          Guardar
-        </button>
-      </div>
+
+        <div class="space-y-2">
+          <label for="prodCategory" class="text-sm font-medium text-gray-700">Categoría *</label>
+          <select 
+            id="prodCategory"
+            [(ngModel)]="productFormData.category" 
+            name="category"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required>
+            <option value="" disabled selected>Seleccione una categoría</option>
+            <option *ngFor="let cat of categories" [value]="cat.name">
+              {{ cat.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <div class="space-y-2">
+            <label for="prodPrice" class="text-sm font-medium text-gray-700">Precio ($) *</label>
+            <input 
+              id="prodPrice"
+              type="number" 
+              [(ngModel)]="productFormData.price" 
+              name="price" 
+              placeholder="0"
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500" 
+              required />
+          </div>
+
+          <div class="space-y-2">
+            <label for="prodStock" class="text-sm font-medium text-gray-700">Stock Actual</label>
+            <input 
+              id="prodStock"
+              type="number" 
+              [(ngModel)]="productFormData.stock" 
+              name="stock" 
+              placeholder="0"
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+
+          <div class="space-y-2">
+            <label for="prodMinStock" class="text-sm font-medium text-gray-700">Mínimo Permitido</label>
+            <input 
+              id="prodMinStock"
+              type="number" 
+              [(ngModel)]="productFormData.minStock" 
+              name="minStock" 
+              placeholder="0"
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+
+        </div>
+
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 pt-4 border-t mt-4">
+          <button 
+            type="button" 
+            (click)="closeModal()" 
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input h-9 px-4 py-2 bg-transparent text-gray-700 hover:bg-gray-50 transition-colors">
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            [disabled]="!productForm.form.valid"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium shadow h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed">
+            {{ isEditing ? 'Guardar Cambios' : 'Registrar Producto' }}
+          </button>
+        </div>
+      </form>
+
     </div>
   </div>
 </div>
