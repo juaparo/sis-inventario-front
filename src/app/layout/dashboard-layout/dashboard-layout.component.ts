@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { 
   LucideAngularModule, 
   LayoutDashboard, 
@@ -16,6 +17,7 @@ import {
   Shield 
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
+import { AlertsService } from '../../services/alerts.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -24,7 +26,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './dashboard-layout.component.html',
   styleUrls: ['./dashboard-layout.component.css']
 })
-export class DashboardLayoutComponent implements OnInit {
+export class DashboardLayoutComponent implements OnInit, OnDestroy {
   LayoutDashboardIcon = LayoutDashboard;
   PackageIcon = Package;
   RefreshCwIcon = RefreshCw;
@@ -39,14 +41,16 @@ export class DashboardLayoutComponent implements OnInit {
   sidebarOpen = true;
   user: any = {};
   isAdmin = false;
-  unreadAlerts = 3;
+  unreadAlerts = 0;
   currentPath = '';
+  private alertSub?: Subscription;
 
   menuItems: any[] = [];
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertsService: AlertsService
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -60,23 +64,50 @@ export class DashboardLayoutComponent implements OnInit {
     this.user = userStr ? JSON.parse(userStr) : {};
     this.isAdmin = this.user.role === 'Administrador';
 
-    this.menuItems = [
-      { icon: this.LayoutDashboardIcon, label: 'Dashboard', path: '/' },
-      { icon: this.PackageIcon, label: 'Productos', path: '/products' },
-      { icon: this.TagIcon, label: 'Categorías', path: '/categories' },
-      { icon: this.RefreshCwIcon, label: 'Movimientos', path: '/movements' },
-      { icon: this.BellIcon, label: 'Alertas', path: '/alerts', badge: this.unreadAlerts }
-    ];
-
-    if (this.isAdmin) {
-      this.menuItems.push(
-        { icon: this.UsersIcon, label: 'Usuarios', path: '/users' },
-        { icon: this.ShieldIcon, label: 'Roles', path: '/roles' }
-      );
+    this.menuItems = [];
+    
+    if (this.authService.hasPermission('dashboard_view')) {
+      this.menuItems.push({ icon: this.LayoutDashboardIcon, label: 'Dashboard', path: '/' });
+    }
+    if (this.authService.hasPermission('products_view')) {
+      this.menuItems.push({ icon: this.PackageIcon, label: 'Productos', path: '/products' });
+    }
+    if (this.authService.hasPermission('categories_view')) {
+      this.menuItems.push({ icon: this.TagIcon, label: 'Categorías', path: '/categories' });
+    }
+    if (this.authService.hasPermission('movements_create')) {
+      this.menuItems.push({ icon: this.RefreshCwIcon, label: 'Movimientos', path: '/movements' });
+    }
+    if (this.authService.hasPermission('alerts_manage')) {
+      this.menuItems.push({ icon: this.BellIcon, label: 'Alertas', path: '/alerts', badge: this.unreadAlerts });
+    }
+    if (this.authService.hasPermission('users_view') || this.authService.hasPermission('users_manage')) {
+      this.menuItems.push({ icon: this.UsersIcon, label: 'Usuarios', path: '/users' });
+    }
+    if (this.authService.hasPermission('roles_view') || this.authService.hasPermission('roles_manage')) {
+      this.menuItems.push({ icon: this.ShieldIcon, label: 'Roles', path: '/roles' });
     }
     
     // Set initial path
     this.currentPath = this.router.url;
+
+    // Cargar alertas iniciales
+    this.alertsService.getAlerts().subscribe();
+
+    // Suscribirse a cambios en tiempo real
+    this.alertSub = this.alertsService.unreadCount$.subscribe(count => {
+      this.unreadAlerts = count;
+      const alertsMenu = this.menuItems.find(m => m.label === 'Alertas');
+      if (alertsMenu) {
+        alertsMenu.badge = count;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.alertSub) {
+      this.alertSub.unsubscribe();
+    }
   }
 
   toggleSidebar() {

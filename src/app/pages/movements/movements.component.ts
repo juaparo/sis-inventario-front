@@ -5,6 +5,7 @@ import { Plus, ArrowDownCircle, ArrowUpCircle, Search, LucideAngularModule } fro
 import { MovementsService } from '../../services/movements.service';
 import { ProductsService } from '../../services/products.service';
 import { AuthService } from '../../services/auth.service';
+import { AlertsService } from '../../services/alerts.service';
 
 @Component({
   selector: 'app-movements',
@@ -37,7 +38,8 @@ export class MovementsComponent implements OnInit {
   constructor(
     private movementsService: MovementsService,
     private productsService: ProductsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertsService: AlertsService
   ) {
     this.currentUser = this.authService.getUser();
   }
@@ -93,6 +95,9 @@ export class MovementsComponent implements OnInit {
         this.closeModal();
         this.loadMovements();
         this.loadProducts();
+        
+        // Refrescar las alertas (silenciosamente) para actualizar contador
+        this.alertsService.getAlerts().subscribe();
       },
       error: (err) => alert(err.error?.message || 'Error al guardar movimiento')
     });

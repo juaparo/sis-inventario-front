@@ -29,4 +29,10 @@ export class AuthService {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
   }
+
+  hasPermission(permission: string): boolean {
+    const user = this.getUser();
+    if (!user || !user.permissions) return false;
+    return user.permissions.includes(permission);
+  }
 }

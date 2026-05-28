@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Plus, Edit2, Power, PowerOff, Search, Tag, LucideAngularModule } from 'lucide-angular';
 import { CategoriesService, Category } from '../../services/categories.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-categories',
@@ -13,6 +14,7 @@ import { CategoriesService, Category } from '../../services/categories.service';
 })
 export class CategoriesComponent implements OnInit {
   private categoriesService = inject(CategoriesService);
+  public authService = inject(AuthService);
 
   // Inyección de iconos Lucide
   PlusIcon = Plus;

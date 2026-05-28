@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Plus, Search, Edit2, Trash2, Power, PowerOff, LucideAngularModule } from 'lucide-angular';
 import { CategoriesService, Category } from '../../services/categories.service';
 import { ProductsService } from '../../services/products.service'; // Inyección del servicio de persistencia
+import { AuthService } from '../../services/auth.service';
 
 export interface Product {
   id?: string;
@@ -26,6 +27,7 @@ export interface Product {
 export class ProductsComponent implements OnInit {
   private categoriesService = inject(CategoriesService);
   private productsService = inject(ProductsService); // Core HTTP
+  public authService = inject(AuthService);
 
   PlusIcon = Plus;
   SearchIcon = Search;
