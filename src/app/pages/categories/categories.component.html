@@ -1,25 +1,25 @@
 <div class="space-y-6 relative">
-  <!-- Header -->
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-semibold text-gray-900">Categorías de Productos</h1>
       <p class="text-gray-500 mt-1">Gestión y organización de categorías del inventario</p>
     </div>
-    <button (click)="openModal()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white shadow">
+    <button (click)="openModal()"
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white shadow">
       <lucide-icon [img]="PlusIcon" class="w-4 h-4 mr-2"></lucide-icon>
       Nueva Categoría
     </button>
   </div>
 
-  <!-- Search -->
   <div class="rounded-xl border bg-card text-card-foreground shadow bg-white p-6">
     <div class="relative max-w-md">
-      <lucide-icon [img]="SearchIcon" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></lucide-icon>
-      <input [(ngModel)]="searchTerm" placeholder="Buscar categorías..." class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm pl-10 focus:outline-none" />
+      <lucide-icon [img]="SearchIcon"
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></lucide-icon>
+      <input [(ngModel)]="searchTerm" aria-label="Buscar categorías de productos" placeholder="Buscar categorías..."
+        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm pl-10 focus:outline-none" />
     </div>
   </div>
 
-  <!-- Stats -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
     <div class="rounded-xl border bg-card text-card-foreground shadow bg-white p-6">
       <div class="flex items-center gap-4">
@@ -67,93 +67,117 @@
     </div>
   </div>
 
-  <!-- Table -->
   <div class="rounded-xl border bg-card text-card-foreground shadow bg-white">
     <div class="overflow-x-auto">
       <table class="w-full caption-bottom text-sm">
         <thead class="[&_tr]:border-b">
-          <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[100px]">Nombre</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Descripción</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Productos</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Fecha Creación</th>
-            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Estado</th>
-            <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Acciones</th>
+          <tr class="border-b transition-colors hover:bg-muted/50">
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 w-[100px]">Nombre</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Descripción</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Productos</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Fecha Creación</th>
+            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Estado</th>
+            <th class="h-12 px-4 text-right align-middle font-medium text-gray-500 border-b">Acciones</th>
           </tr>
         </thead>
         <tbody class="[&_tr:last-child]:border-0">
-          <tr *ngFor="let category of filteredCategories" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+          @for (category of filteredCategories; track category.id) {
+          <tr class="border-b transition-colors hover:bg-gray-50">
             <td class="p-4 align-middle">
               <div class="flex items-center gap-3">
                 <div class="p-2 bg-blue-50 rounded-lg">
                   <lucide-icon [img]="TagIcon" class="w-4 h-4 text-blue-600"></lucide-icon>
                 </div>
-                <span class="font-medium">{{category.name}}</span>
+                <span class="font-medium text-gray-900">{{category.name}}</span>
               </div>
             </td>
             <td class="p-4 align-middle max-w-md">
               <p class="text-gray-600 line-clamp-2">{{category.description}}</p>
             </td>
             <td class="p-4 align-middle">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-purple-100 text-purple-700">
+              <span
+                class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-purple-100 text-purple-700 border-purple-200">
                 {{category.productCount}} productos
               </span>
             </td>
-            <td class="p-4 align-middle text-gray-500">{{category.createdAt}}</td>
+            <td class="p-4 align-middle text-gray-500">{{category.createdAt | date: 'dd/MM/yyyy'}}</td>
             <td class="p-4 align-middle">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold" [ngClass]="category.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
+              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                [ngClass]="category.status === 'active' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-700 border-gray-200'">
                 {{category.status === 'active' ? 'Activa' : 'Inactiva'}}
               </span>
             </td>
             <td class="p-4 align-middle text-right">
               <div class="flex items-center justify-end gap-2">
-                <button (click)="openModal(category)" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-9 w-9 text-gray-700 bg-transparent">
+                <button (click)="openModal(category)" aria-label="Editar categoría"
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-9 w-9 text-gray-500 bg-transparent">
                   <lucide-icon [img]="Edit2Icon" class="w-4 h-4"></lucide-icon>
                 </button>
-                <button (click)="toggleStatus(category)" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-9 w-9 bg-transparent" [ngClass]="category.status === 'active' ? 'text-red-600' : 'text-green-600'">
-                  <lucide-icon *ngIf="category.status === 'active'" [img]="PowerOffIcon" class="w-4 h-4"></lucide-icon>
-                  <lucide-icon *ngIf="category.status !== 'active'" [img]="PowerIcon" class="w-4 h-4"></lucide-icon>
+                <button (click)="toggleStatus(category)"
+                  [ariaLabel]="category.status === 'active' ? 'Inactivar categoría' : 'Activar categoría'"
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-100 h-9 w-9 bg-transparent"
+                  [ngClass]="category.status === 'active' ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700'">
+                  @if (category.status === 'active') {
+                  <lucide-icon [img]="PowerOffIcon" class="w-4 h-4"></lucide-icon>
+                  } @else {
+                  <lucide-icon [img]="PowerIcon" class="w-4 h-4"></lucide-icon>
+                  }
                 </button>
               </div>
             </td>
           </tr>
+          } @empty {
+          <tr>
+            <td colspan="6" class="p-8 text-center text-gray-400">
+              <div class="inline-flex items-center justify-center w-12 h-12 bg-gray-50 rounded-full mb-2">
+                <lucide-icon [img]="TagIcon" class="w-6 h-6 text-gray-400"></lucide-icon>
+              </div>
+              <h3 class="text-base font-medium text-gray-900 mb-1">No se encontraron categorías</h3>
+              <p class="text-sm text-gray-500">Intente buscar con otros términos o cree una nueva.</p>
+            </td>
+          </tr>
+          }
         </tbody>
       </table>
     </div>
-    <div *ngIf="filteredCategories.length === 0" class="text-center py-12">
-      <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
-        <lucide-icon [img]="TagIcon" class="w-8 h-8 text-gray-400"></lucide-icon>
-      </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron categorías</h3>
-      <p class="text-gray-500">Intenta buscar con otros términos</p>
-    </div>
   </div>
 
-  <!-- Modal -->
-  <div *ngIf="isModalOpen" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-    <div class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg md:w-full bg-white">
+  @if (isModalOpen) {
+  <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+    <div
+      class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg bg-white">
       <div class="flex flex-col space-y-1.5 text-center sm:text-left">
-        <h2 class="text-lg font-semibold leading-none tracking-tight">{{editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}}</h2>
-        <p class="text-sm text-muted-foreground text-gray-500">Complete la información de la categoría</p>
+        <h2 class="text-lg font-semibold text-gray-900">
+          {{editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}}
+        </h2>
+        <p class="text-sm text-gray-500">Complete la información de la categoría para guardar los cambios</p>
       </div>
-      <div class="space-y-4 py-4">
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Nombre de la categoría</label>
-          <input [(ngModel)]="formData.name" placeholder="Ej: Electrónica" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" />
+
+      <div class="space-y-4 py-2 text-sm text-gray-700">
+        <div class="space-y-1">
+          <label for="cat-name" class="font-medium">Nombre de la categoría *</label>
+          <input id="cat-name" [(ngModel)]="formData.name" placeholder="Ej: Electrónica"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
         </div>
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Descripción</label>
-          <textarea [(ngModel)]="formData.description" placeholder="Describe el tipo de productos" rows="4" class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"></textarea>
+        <div class="space-y-1">
+          <label for="cat-desc" class="font-medium">Descripción *</label>
+          <textarea id="cat-desc" [(ngModel)]="formData.description"
+            placeholder="Describe el tipo de productos que pertenecerán aquí" rows="4"
+            class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
         </div>
       </div>
-      <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
-        <button (click)="closeModal()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent h-9 px-4 py-2 bg-transparent text-gray-800">
+
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-2">
+        <button (click)="closeModal()"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-gray-200 bg-white h-9 px-4 py-2 text-gray-700 hover:bg-gray-50">
           Cancelar
         </button>
-        <button (click)="saveCategory()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium shadow h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white">
-          Guardar
+        <button (click)="saveCategory()"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium shadow h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white">
+          Guardar en Base de Datos
         </button>
       </div>
     </div>
   </div>
+  }
 </div>

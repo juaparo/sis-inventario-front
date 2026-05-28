@@ -9,6 +9,7 @@ import { AlertsComponent } from './pages/alerts/alerts.component';
 import { UsersComponent } from './pages/users/users.component';
 import { RolesComponent } from './pages/roles/roles.component';
 import { authGuard } from './guards/auth.guard';
+import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -22,8 +23,8 @@ export const routes: Routes = [
       { path: 'categories', component: CategoriesComponent },
       { path: 'movements', component: MovementsComponent },
       { path: 'alerts', component: AlertsComponent },
-      { path: 'users', component: UsersComponent },
-      { path: 'roles', component: RolesComponent }
+      { path: 'users', component: UsersComponent, canActivate: [roleGuard] },
+      { path: 'roles', component: RolesComponent, canActivate: [roleGuard] }
     ]
   },
   { path: '**', redirectTo: '' }
