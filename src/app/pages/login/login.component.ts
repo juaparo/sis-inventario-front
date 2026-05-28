@@ -21,8 +21,12 @@ export class LoginComponent {
   email = '';
   password = '';
   showPassword = false;
-  errors = { email: '', password: '' };
+  errors = { email: '', password: '', general: '' };
   isLoading = false;
+  
+  forgotPasswordMode = false;
+  simulatedUrl = '';
+  successMessage = '';
 
   constructor(
     private router: Router, 
@@ -54,7 +58,7 @@ export class LoginComponent {
       isValid = false;
     }
 
-    this.errors = newErrors;
+    this.errors = { ...this.errors, ...newErrors };
     return isValid;
   }
 
@@ -80,6 +84,32 @@ export class LoginComponent {
         this.isLoading = false;
         this.toast.error(err.error?.message || 'Credenciales incorrectas');
         this.errors.password = 'Correo o contraseña incorrectos';
+      }
+    });
+  }
+
+  handleForgotPassword() {
+    this.errors.email = '';
+    this.successMessage = '';
+    
+    if (!this.email) {
+      this.errors.email = 'Por favor ingresa tu correo';
+      return;
+    }
+    
+    this.isLoading = true;
+    this.authService.forgotPassword(this.email).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.successMessage = res.message;
+        if (res.simulatedEmailUrl) {
+          this.simulatedUrl = res.simulatedEmailUrl;
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        // Mostramos éxito igual por seguridad (evitar enumeración de usuarios)
+        this.successMessage = 'Si el correo existe, se ha generado un enlace de recuperación';
       }
     });
   }

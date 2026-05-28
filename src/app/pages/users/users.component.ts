@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Plus, Edit2, Power, PowerOff, Search, LucideAngularModule } from 'lucide-angular';
+import { Plus, Edit2, Power, PowerOff, Search, Eye, EyeOff, CheckCircle2, XCircle, LucideAngularModule } from 'lucide-angular';
 import { UserService } from '../../services/user.service';
 import { RoleService } from '../../services/role.service';
 import { ToastService } from '../../components/toast/toast.service';
@@ -19,11 +19,26 @@ export class UsersComponent implements OnInit {
   PowerIcon = Power;
   PowerOffIcon = PowerOff;
   SearchIcon = Search;
+  EyeIcon = Eye;
+  EyeOffIcon = EyeOff;
+  CheckIcon = CheckCircle2;
+  XIcon = XCircle;
 
   isAdmin = false;
   searchTerm = '';
   isModalOpen = false;
   editingUser: any = null;
+  showPassword = false;
+  showConfirmPassword = false;
+  confirmPassword = '';
+
+  rules = {
+    length: false,
+    upper: false,
+    lower: false,
+    number: false,
+    special: false
+  };
   
   formData: any = {
     name: '',
@@ -88,6 +103,10 @@ export class UsersComponent implements OnInit {
   }
 
   openModal(user?: any) {
+    this.showPassword = false;
+    this.showConfirmPassword = false;
+    this.confirmPassword = '';
+    this.validatePassword('');
     if (user) {
       this.editingUser = user;
       this.formData = { name: user.name, email: user.email, role: user.role?._id || user.role, password: '' };
@@ -102,12 +121,40 @@ export class UsersComponent implements OnInit {
     this.isModalOpen = false;
   }
 
+  togglePassword(field: 'password' | 'confirm' = 'password') {
+    if (field === 'password') this.showPassword = !this.showPassword;
+    if (field === 'confirm') this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  validatePassword(pwd: string = this.formData.password) {
+    this.rules.length = pwd.length >= 8;
+    this.rules.upper = /[A-Z]/.test(pwd);
+    this.rules.lower = /[a-z]/.test(pwd);
+    this.rules.number = /[0-9]/.test(pwd);
+    this.rules.special = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+  }
+
+  isPasswordValid() {
+    return Object.values(this.rules).every(Boolean);
+  }
+
   saveUser() {
     if (!this.formData.name || !this.formData.email || !this.formData.role) return;
 
     if (this.editingUser) {
       const updateData = { ...this.formData };
-      if (!updateData.password) delete updateData.password;
+      if (!updateData.password) {
+        delete updateData.password;
+      } else {
+        if (!this.isPasswordValid()) {
+          this.toast.error('La nueva contraseña no cumple con los requisitos de seguridad');
+          return;
+        }
+        if (this.formData.password !== this.confirmPassword) {
+          this.toast.error('Las contraseñas no coinciden');
+          return;
+        }
+      }
 
       this.userService.updateUser(this.editingUser._id, updateData).subscribe({
         next: () => {
@@ -120,6 +167,14 @@ export class UsersComponent implements OnInit {
     } else {
       if (!this.formData.password) {
         this.toast.error('La contraseña es requerida para nuevos usuarios');
+        return;
+      }
+      if (!this.isPasswordValid()) {
+        this.toast.error('La contraseña no cumple con los requisitos de seguridad');
+        return;
+      }
+      if (this.formData.password !== this.confirmPassword) {
+        this.toast.error('Las contraseñas no coinciden');
         return;
       }
       this.userService.createUser(this.formData).subscribe({

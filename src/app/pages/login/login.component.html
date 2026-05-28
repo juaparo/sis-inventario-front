@@ -11,9 +11,17 @@
 
     <!-- Card de login -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
-      <h2 class="text-xl font-semibold text-gray-900 mb-6">Iniciar sesión</h2>
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">{{ forgotPasswordMode ? 'Recuperar contraseña' : 'Iniciar sesión' }}</h2>
 
-      <form (submit)="handleSubmit($event)" class="space-y-5">
+      <!-- Alerta de simulación de correo -->
+      <div *ngIf="successMessage" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <p class="text-sm text-green-800">{{ successMessage }}</p>
+        <a *ngIf="simulatedUrl" [href]="simulatedUrl" class="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-800 underline">
+          Simulación: Clic aquí para recuperar contraseña
+        </a>
+      </div>
+
+      <form (submit)="forgotPasswordMode ? handleForgotPassword() : handleSubmit($event)" class="space-y-5">
         <!-- Email -->
         <div class="space-y-2">
           <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Correo electrónico</label>
@@ -30,9 +38,12 @@
           <p *ngIf="errors.email" class="text-sm text-red-500">{{errors.email}}</p>
         </div>
 
-        <!-- Password -->
-        <div class="space-y-2">
-          <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
+        <!-- Password (Solo en login) -->
+        <div *ngIf="!forgotPasswordMode" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
+            <a href="javascript:void(0)" (click)="forgotPasswordMode = true" class="text-xs text-blue-600 hover:underline">¿Olvidaste tu contraseña?</a>
+          </div>
           <div class="relative">
             <input
               id="password"
@@ -57,11 +68,15 @@
         </div>
 
         <!-- Submit button -->
-        <button type="submit" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary-foreground shadow h-9 px-4 py-2 w-full bg-blue-600 hover:bg-blue-700 text-white">
-          Iniciar sesión
+        <button [disabled]="isLoading" type="submit" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary-foreground shadow h-9 px-4 py-2 w-full bg-blue-600 hover:bg-blue-700 text-white mt-4">
+          {{ forgotPasswordMode ? 'Enviar enlace de recuperación' : 'Iniciar sesión' }}
         </button>
-      </form>
 
+        <!-- Volver a login -->
+        <div *ngIf="forgotPasswordMode" class="text-center mt-4">
+          <a href="javascript:void(0)" (click)="forgotPasswordMode = false; successMessage = ''" class="text-sm text-gray-500 hover:text-gray-900">Volver a iniciar sesión</a>
+        </div>
+      </form>
 
     </div>
 

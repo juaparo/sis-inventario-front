@@ -119,8 +119,44 @@
           </select>
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium">Contraseña <span *ngIf="editingUser">(dejar vacío para no cambiar)</span></label>
-          <input [(ngModel)]="formData.password" type="password" placeholder="••••••••" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" />
+          <label class="text-sm font-medium">Contraseña <span *ngIf="editingUser" class="text-gray-500 font-normal">(dejar vacío para no cambiar)</span></label>
+          <div class="relative">
+            <input [(ngModel)]="formData.password" (ngModelChange)="validatePassword()" [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm pr-10 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            <button type="button" (click)="togglePassword('password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <lucide-icon *ngIf="showPassword" [img]="EyeOffIcon" class="w-4 h-4"></lucide-icon>
+              <lucide-icon *ngIf="!showPassword" [img]="EyeIcon" class="w-4 h-4"></lucide-icon>
+            </button>
+          </div>
+          
+          <div *ngIf="formData.password || !editingUser" class="mt-2 space-y-2">
+            <label class="text-sm font-medium">Confirmar contraseña</label>
+            <div class="relative">
+              <input [(ngModel)]="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" placeholder="••••••••" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm pr-10 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <button type="button" (click)="togglePassword('confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <lucide-icon *ngIf="showConfirmPassword" [img]="EyeOffIcon" class="w-4 h-4"></lucide-icon>
+                <lucide-icon *ngIf="!showConfirmPassword" [img]="EyeIcon" class="w-4 h-4"></lucide-icon>
+              </button>
+            </div>
+          </div>
+          
+          <div *ngIf="formData.password || !editingUser" class="mt-2 p-3 bg-gray-50 rounded-lg text-xs space-y-1.5 border border-gray-100">
+            <p class="font-medium text-gray-700 mb-1">Requisitos de seguridad:</p>
+            <div class="flex items-center gap-2 transition-colors duration-300" [ngClass]="rules.length ? 'text-green-600' : 'text-gray-400'">
+              <lucide-icon [img]="rules.length ? CheckIcon : XIcon" class="w-3 h-3"></lucide-icon><span>Mínimo 8 caracteres</span>
+            </div>
+            <div class="flex items-center gap-2 transition-colors duration-300" [ngClass]="rules.upper ? 'text-green-600' : 'text-gray-400'">
+              <lucide-icon [img]="rules.upper ? CheckIcon : XIcon" class="w-3 h-3"></lucide-icon><span>Al menos una mayúscula</span>
+            </div>
+            <div class="flex items-center gap-2 transition-colors duration-300" [ngClass]="rules.lower ? 'text-green-600' : 'text-gray-400'">
+              <lucide-icon [img]="rules.lower ? CheckIcon : XIcon" class="w-3 h-3"></lucide-icon><span>Al menos una minúscula</span>
+            </div>
+            <div class="flex items-center gap-2 transition-colors duration-300" [ngClass]="rules.number ? 'text-green-600' : 'text-gray-400'">
+              <lucide-icon [img]="rules.number ? CheckIcon : XIcon" class="w-3 h-3"></lucide-icon><span>Al menos un número</span>
+            </div>
+            <div class="flex items-center gap-2 transition-colors duration-300" [ngClass]="rules.special ? 'text-green-600' : 'text-gray-400'">
+              <lucide-icon [img]="rules.special ? CheckIcon : XIcon" class="w-3 h-3"></lucide-icon><span>Al menos un carácter especial</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
